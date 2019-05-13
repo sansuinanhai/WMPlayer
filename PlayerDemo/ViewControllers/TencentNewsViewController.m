@@ -12,11 +12,12 @@
  */
 
 #import "TencentNewsViewController.h"
-#import "DetailViewController.h"
+#import "WNPlayerDetailViewController.h"
 #import "AppDelegate.h"
 #import "MJRefresh.h"
 #import "HomeVideoCollectionViewCell.h"
 #import "WMPlayerModel.h"
+#import "TestFFmpegViewController.h"
 
 @interface TencentNewsViewController ()<UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource>{
     
@@ -34,10 +35,18 @@
     [super viewWillAppear:animated];
     [self.navigationController setNavigationBarHidden:NO animated:NO];
 }
+-(void)testFFmpeng:(UIBarButtonItem *)sender{
+    TestFFmpegViewController *testVC = [TestFFmpegViewController new];
+    [self.navigationController pushViewController:testVC animated:YES];
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.navigationItem.title = @"视频推荐";
+    
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"测试转码" style:UIBarButtonItemStylePlain target:self action:@selector(testFFmpeng:)];
+    
+    
     UICollectionViewFlowLayout* videoFlowLayout = [[UICollectionViewFlowLayout alloc] init];
     [videoFlowLayout setScrollDirection:UICollectionViewScrollDirectionVertical];//垂直滚动
     self.videoCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width,[UIScreen mainScreen].bounds.size.height) collectionViewLayout:videoFlowLayout];
@@ -124,10 +133,12 @@
     VideoDataModel *videoModel = self.videoDataAry[indexPath.row];
     WMPlayerModel *playerModel = [WMPlayerModel new];
     playerModel.videoURL = [NSURL URLWithString:videoModel.video_url];
+//    playerModel.videoURL = [NSURL URLWithString:@"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4"];
     playerModel.title = videoModel.nickname;
-    DetailViewController* detailVC = [[DetailViewController alloc] init];
-    detailVC.playerModel = playerModel;
-    [self.navigationController pushViewController:detailVC animated:YES];
+    WNPlayerDetailViewController* wnDetailVC = [[WNPlayerDetailViewController alloc] init];
+    wnDetailVC.playerModel = playerModel;
+    [self.navigationController pushViewController:wnDetailVC animated:YES];
+
 }
 
 -(void)dealloc{

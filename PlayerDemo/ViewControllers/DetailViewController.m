@@ -11,7 +11,8 @@
 
 @interface DetailViewController ()<WMPlayerDelegate>
 @property(nonatomic,strong)    UIButton *nextBtn;
-@property(nonatomic,strong)    UIView *videoContent;
+@property(nonatomic,strong)    UIView *blackView;
+
 
 @property(nonatomic,assign)    BOOL  forbidRotate;//手势返回的时候禁止旋转VC
 @end
@@ -32,9 +33,9 @@
     if (self.forbidRotate) {
         return NO;
     }
-    if (self.wmPlayer.playerModel.verticalVideo) {
-        return NO;
-    }
+//    if (self.wmPlayer.playerModel.verticalVideo) {
+//        return NO;
+//    }
      return !self.wmPlayer.isLockScreen;
 }
 //viewController所支持的全部旋转方向
@@ -42,7 +43,7 @@
     return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 -(UIInterfaceOrientation)preferredInterfaceOrientationForPresentation{
-    //对于present出来的控制器，要主动的（强制的）选择VC，让wmPlayer全屏
+    //对于present出来的控制器，要主动的（强制的）旋转VC，让wmPlayer全屏
 //    UIInterfaceOrientationLandscapeLeft或UIInterfaceOrientationLandscapeRight
     [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeRight) forKey:@"orientation"];
     return UIInterfaceOrientationLandscapeRight;
@@ -52,7 +53,7 @@
     if (wmplayer.isFullscreen) {
         [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationPortrait) forKey:@"orientation"];
         //刷新
-        [UIViewController attemptRotationToDeviceOrientation];
+//        [UIViewController attemptRotationToDeviceOrientation];
     }else{
         if (self.presentingViewController) {
             [self dismissViewControllerAnimated:YES completion:^{
@@ -146,22 +147,20 @@
 
 //点击进入,退出全屏,或者监测到屏幕旋转去调用的方法
 -(void)toOrientation:(UIInterfaceOrientation)orientation{    
-    if (orientation ==UIInterfaceOrientationPortrait) {//
+    if (orientation ==UIInterfaceOrientationPortrait) {
         [self.wmPlayer mas_remakeConstraints:^(MASConstraintMaker *make) {
-        make.leading.trailing.bottom.equalTo(self.wmPlayer.superview);
+            make.leading.trailing.equalTo(self.wmPlayer.superview);
+            make.top.equalTo(self.blackView.mas_bottom);
         make.height.mas_equalTo(self.wmPlayer.mas_width).multipliedBy(9.0/16);
-        }];
-        [self.videoContent mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.leading.trailing.top.equalTo(self.view);
-            make.height.equalTo(@(self.view.frame.size.width*9/16.0+([WMPlayer IsiPhoneX]?34:0)));
         }];
         self.wmPlayer.isFullscreen = NO;
     }else{
         [self.wmPlayer mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.edges.equalTo(self.wmPlayer.superview);
-        }];
-        [self.videoContent mas_remakeConstraints:^(MASConstraintMaker *make) {
-            make.edges.equalTo(self.view);
+            if([WMPlayer IsiPhoneX]){
+                make.edges.mas_equalTo(UIEdgeInsetsMake(self.wmPlayer.playerModel.verticalVideo?14:0, 0, 0, 0));
+            }else{
+            make.edges.mas_equalTo(UIEdgeInsetsMake(0, 0, 0, 0));
+            }
         }];
         self.wmPlayer.isFullscreen = YES;
     }
@@ -192,12 +191,12 @@
                                                object:nil
      ];
     
-    self.videoContent = [UIView new];
-    self.videoContent.backgroundColor = [UIColor blackColor];
-    [self.view addSubview:self.videoContent];
-    [self.videoContent mas_makeConstraints:^(MASConstraintMaker *make) {
+    self.blackView = [UIView new];
+    self.blackView.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:self.blackView];
+    [self.blackView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.leading.trailing.top.equalTo(self.view);
-        make.height.equalTo(@(self.view.frame.size.width*9/16.0+([WMPlayer IsiPhoneX]?34:0)));
+        make.height.equalTo(@([WMPlayer IsiPhoneX]?34:0));
     }];
     
     if(self.wmPlayer==nil){
@@ -208,11 +207,12 @@
     self.wmPlayer.tintColor = [UIColor orangeColor];//改变播放器着色
     self.wmPlayer.enableBackgroundMode = YES;//开启后台播放模式
     self.wmPlayer.delegate = self;
-    [self.videoContent addSubview:self.wmPlayer];
+    [self.view addSubview:self.wmPlayer];
     [self.wmPlayer play];
     [self.wmPlayer mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.leading.trailing.bottom.equalTo(self.wmPlayer.superview);
-    make.height.mas_equalTo(self.wmPlayer.mas_width).multipliedBy(9.0/16);
+        make.leading.trailing.equalTo(self.wmPlayer.superview);
+        make.top.equalTo(self.blackView.mas_bottom);
+        make.height.mas_equalTo(self.wmPlayer.mas_width).multipliedBy(9.0/16);
     }];
     
     
@@ -243,13 +243,13 @@
     self.gestureEndedBlock = ^(UIViewController *viewController) {
         weakSelf.forbidRotate = NO;
     };
+//        [[UIDevice currentDevice] setValue:@(UIInterfaceOrientationLandscapeRight) forKey:@"orientation"];
 }
 -(void)nextVideo:(UIButton *)sender{
     [self.wmPlayer resetWMPlayer];
     WMPlayerModel *newModel = [WMPlayerModel new];
     newModel.title = @"这个是新视频的标题";
     newModel.videoURL = [NSURL URLWithString:@"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4"];
-//    newModel.videoURL = [NSURL URLWithString:@"http://wx.wangtiansoft.com:8007/m/files/2d/f6/2df64d0556f379d9abae5a16d7c93ab2.mp3"];
     self.wmPlayer.playerModel = newModel;
     [self.wmPlayer play];
 }

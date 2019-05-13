@@ -208,7 +208,7 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
     //进度条的拖拽事件
     [self.progressSlider addTarget:self action:@selector(stratDragSlide:)  forControlEvents:UIControlEventValueChanged];
     //进度条的点击事件
-    [self.progressSlider addTarget:self action:@selector(updateProgress:) forControlEvents:UIControlEventTouchUpInside];
+    [self.progressSlider addTarget:self action:@selector(updateProgress:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside];
     //给进度条添加单击手势
     self.progressTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(actionTapGesture:)];
     self.progressTap.delegate = self;
@@ -273,7 +273,6 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
     //titleLabel
     self.titleLabel = [UILabel new];
     self.titleLabel.textColor = [UIColor whiteColor];
-    self.titleLabel.numberOfLines = 1;
     self.titleLabel.font = [UIFont systemFontOfSize:15.0];
     [self.topView addSubview:self.titleLabel];
     
@@ -930,7 +929,7 @@ static void *PlayViewStatusObservationContext = &PlayViewStatusObservationContex
     /* AVPlayerItem "status" property value observer. */
     if (context == PlayViewStatusObservationContext){
         if ([keyPath isEqualToString:@"status"]) {
-            AVPlayerStatus status = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
+            AVPlayerItemStatus status = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
             switch (status){
                 case AVPlayerItemStatusUnknown:{
                     [self.loadingProgress setProgress:0.0 animated:NO];
@@ -1373,6 +1372,6 @@ NSString * calculateTimeWithTimeFormatter(long long timeSecond){
 }
 //版本号
 +(NSString *)version{
-    return @"5.0.0";
+    return @"5.1.0";
 }
 @end

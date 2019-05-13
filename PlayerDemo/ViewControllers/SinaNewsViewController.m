@@ -166,7 +166,7 @@
     if (orientation ==UIInterfaceOrientationPortrait) {
         [self.currentCell.backgroundIV addSubview:self.wmPlayer];
         self.wmPlayer.isFullscreen = NO;
-        self.wmPlayer.backBtnStyle = BackBtnStyleNone;
+        self.wmPlayer.backBtnStyle = BackBtnStyleClose;
         [self.wmPlayer mas_remakeConstraints:^(MASConstraintMaker *make) {
             make.edges.mas_equalTo(self.wmPlayer.superview);
         }];
@@ -175,7 +175,6 @@
         [[UIApplication sharedApplication].keyWindow addSubview:self.wmPlayer];
         self.wmPlayer.isFullscreen = YES;
         self.wmPlayer.backBtnStyle = BackBtnStylePop;
-        
         if(currentOrientation ==UIInterfaceOrientationPortrait){
             if (self.wmPlayer.playerModel.verticalVideo) {
                 [self.wmPlayer mas_remakeConstraints:^(MASConstraintMaker *make) {
@@ -260,6 +259,9 @@
         WMPlayerModel *playerModel = [WMPlayerModel new];
         playerModel.title = videoModel.nickname;
         playerModel.videoURL = [NSURL URLWithString:videoModel.video_url];
+//        playerModel.videoURL = [NSURL URLWithString:@"http://static.tripbe.com/videofiles/20121214/9533522808.f4v.mp4"];
+
+        
         playerModel.indexPath = indexPath;
         weakSelf.wmPlayer = [[WMPlayer alloc] init];
         weakSelf.wmPlayer.delegate = weakSelf;
